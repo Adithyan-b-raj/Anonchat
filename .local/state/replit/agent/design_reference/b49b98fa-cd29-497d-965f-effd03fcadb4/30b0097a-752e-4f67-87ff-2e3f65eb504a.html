@@ -1,0 +1,390 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Chat Room</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                borderRadius: {
+                    lg: "var(--radius)",
+                    md: "calc(var(--radius) - 2px)",
+                    sm: "calc(var(--radius) - 4px)",
+                },
+                colors: {
+                    background: "var(--background)",
+                    foreground: "var(--foreground)",
+                    card: {
+                        DEFAULT: "var(--card)",
+                        foreground: "var(--card-foreground)",
+                    },
+                    primary: {
+                        DEFAULT: "var(--primary)",
+                        foreground: "var(--primary-foreground)",
+                    },
+                    secondary: {
+                        DEFAULT: "var(--secondary)",
+                        foreground: "var(--secondary-foreground)",
+                    },
+                    muted: {
+                        DEFAULT: "var(--muted)",
+                        foreground: "var(--muted-foreground)",
+                    },
+                    accent: {
+                        DEFAULT: "var(--accent)",
+                        foreground: "var(--accent-foreground)",
+                    },
+                    destructive: {
+                        DEFAULT: "var(--destructive)",
+                        foreground: "var(--destructive-foreground)",
+                    },
+                    border: "var(--border)",
+                    input: "var(--input)",
+                    ring: "var(--ring)",
+                },
+                fontFamily: {
+                    sans: ["Inter", "system-ui", "sans-serif"],
+                }
+            },
+        }
+    };
+    </script>
+    <style>
+        :root {
+            --background: hsl(222 84% 4%);
+            --foreground: hsl(210 40% 98%);
+            --card: hsl(222 84% 5%);
+            --card-foreground: hsl(210 40% 98%);
+            --primary: hsl(217 91% 60%);
+            --primary-foreground: hsl(222 84% 5%);
+            --secondary: hsl(217 32% 17%);
+            --secondary-foreground: hsl(210 40% 98%);
+            --muted: hsl(217 32% 17%);
+            --muted-foreground: hsl(215 20% 65%);
+            --accent: hsl(142 76% 36%);
+            --accent-foreground: hsl(210 40% 98%);
+            --destructive: hsl(0 63% 31%);
+            --destructive-foreground: hsl(210 40% 98%);
+            --border: hsl(217 32% 17%);
+            --input: hsl(217 32% 17%);
+            --ring: hsl(217 91% 60%);
+            --radius: 0.5rem;
+        }
+
+        .message-animation {
+            animation: slideInMessage 0.3s ease-out;
+        }
+
+        @keyframes slideInMessage {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .typing-indicator {
+            animation: pulse 1.5s infinite;
+        }
+
+        .scroll-smooth {
+            scroll-behavior: smooth;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-background text-foreground font-sans h-screen overflow-hidden">
+    <!-- @COMPONENT: ChatApplication [main chat interface container] -->
+    <div class="flex flex-col h-screen max-w-4xl mx-auto">
+        
+        <!-- @COMPONENT: ChatHeader [top navigation and status bar] -->
+        <header class="bg-card border-b border-border px-4 py-3 flex-shrink-0">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-3 h-3 bg-accent rounded-full animate-pulse"></div>
+                    <h1 class="text-lg font-semibold text-foreground">Anonymous Chat Room</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-2 text-muted-foreground text-sm">
+                        <i class="fas fa-users"></i>
+                        <span data-bind="onlineUsers">12 online</span>
+                    </div>
+                    <div class="text-xs text-muted-foreground" data-bind="currentTime">
+                        2:47 PM
+                    </div>
+                </div>
+            </div>
+        </header>
+        <!-- @END_COMPONENT: ChatHeader -->
+
+        <!-- @COMPONENT: MessageArea [scrollable chat messages container] -->
+        <main class="flex-1 overflow-y-auto px-4 py-4 space-y-4 scroll-smooth" id="messageContainer">
+            
+            <!-- System Message - User Join -->
+            <div class="flex justify-center" data-mock="true">
+                <div class="bg-muted px-3 py-1 rounded-full text-xs text-muted-foreground">
+                    <i class="fas fa-sign-in-alt mr-1"></i>
+                    <span data-bind="systemMessage">Anonymous_7891 joined the chat</span>
+                </div>
+            </div>
+
+            <!-- @MAP: messages.map(message => ( -->
+            <!-- Sample Message 1 -->
+            <div class="message-animation" data-mock="true">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
+                        <span data-bind="message.user.avatar">A</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline space-x-2">
+                            <span class="font-medium text-foreground text-sm" data-bind="message.user.name">Anonymous_4532</span>
+                            <span class="text-xs text-muted-foreground" data-bind="message.timestamp">2:45 PM</span>
+                        </div>
+                        <p class="text-foreground mt-1 break-words" data-bind="message.content">
+                            Hey everyone! Great to be here. How's everyone doing today?
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Message 2 -->
+            <div class="message-animation" data-mock="true">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-secondary-foreground text-sm font-medium">
+                        <span data-bind="message.user.avatar">B</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline space-x-2">
+                            <span class="font-medium text-foreground text-sm" data-bind="message.user.name">Anonymous_9876</span>
+                            <span class="text-xs text-muted-foreground" data-bind="message.timestamp">2:45 PM</span>
+                        </div>
+                        <p class="text-foreground mt-1 break-words" data-bind="message.content">
+                            Pretty good! This chat interface looks really clean. Love the dark theme 🌙
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Message 3 -->
+            <div class="message-animation" data-mock="true">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-accent rounded-full flex items-center justify-center text-accent-foreground text-sm font-medium">
+                        <span data-bind="message.user.avatar">C</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline space-x-2">
+                            <span class="font-medium text-foreground text-sm" data-bind="message.user.name">Anonymous_1234</span>
+                            <span class="text-xs text-muted-foreground" data-bind="message.timestamp">2:46 PM</span>
+                        </div>
+                        <p class="text-foreground mt-1 break-words" data-bind="message.content">
+                            Anyone here into web development? I'm working on a Node.js project and could use some tips!
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Message 4 -->
+            <div class="message-animation" data-mock="true">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-primary-foreground text-sm font-medium">
+                        <span data-bind="message.user.avatar">D</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline space-x-2">
+                            <span class="font-medium text-foreground text-sm" data-bind="message.user.name">Anonymous_5678</span>
+                            <span class="text-xs text-muted-foreground" data-bind="message.timestamp">2:46 PM</span>
+                        </div>
+                        <p class="text-foreground mt-1 break-words" data-bind="message.content">
+                            @Anonymous_1234 I'm a full-stack dev! What kind of tips are you looking for? Express, database stuff, deployment?
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Message - User Leave -->
+            <div class="flex justify-center" data-mock="true">
+                <div class="bg-muted px-3 py-1 rounded-full text-xs text-muted-foreground">
+                    <i class="fas fa-sign-out-alt mr-1"></i>
+                    <span data-bind="systemMessage">Anonymous_2468 left the chat</span>
+                </div>
+            </div>
+
+            <!-- Sample Message 5 -->
+            <div class="message-animation" data-mock="true">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-secondary rounded-full flex items-center justify-center text-secondary-foreground text-sm font-medium">
+                        <span data-bind="message.user.avatar">E</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-baseline space-x-2">
+                            <span class="font-medium text-foreground text-sm" data-bind="message.user.name">Anonymous_8642</span>
+                            <span class="text-xs text-muted-foreground" data-bind="message.timestamp">2:47 PM</span>
+                        </div>
+                        <p class="text-foreground mt-1 break-words" data-bind="message.content">
+                            This real-time messaging is so smooth! Socket.io is amazing for this kind of stuff.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_MAP )) -->
+
+            <!-- Typing Indicator -->
+            <div class="flex items-start space-x-3 typing-indicator" data-mock="true" data-implementation="Show when users are typing">
+                <div class="w-8 h-8 bg-muted rounded-full flex items-center justify-center text-muted-foreground text-sm">
+                    <i class="fas fa-ellipsis-h"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm text-muted-foreground italic">
+                        <span data-bind="typingUser">Anonymous_9999</span> is typing...
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        <!-- @END_COMPONENT: MessageArea -->
+
+        <!-- @COMPONENT: MessageInput [bottom input area for sending messages] -->
+        <footer class="bg-card border-t border-border px-4 py-3 flex-shrink-0">
+            <form class="flex items-center space-x-3" data-event="submit:handleMessageSend" data-implementation="Should send message via Socket.io">
+                <div class="flex-1 relative">
+                    <input 
+                        type="text" 
+                        placeholder="Type your message..." 
+                        class="w-full bg-input border border-border rounded-lg px-4 py-2 text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                        data-bind="messageInput"
+                        data-implementation="Should emit typing events and handle enter key"
+                        data-mock="true"
+                    />
+                    <!-- Character counter for mobile -->
+                    <div class="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-muted-foreground md:hidden">
+                        <span data-bind="charCount">0</span>/500
+                    </div>
+                </div>
+                <button 
+                    type="submit" 
+                    class="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors duration-200 flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-ring"
+                    data-event="click:handleSendMessage"
+                    data-implementation="Should validate input and emit message via Socket.io"
+                    data-mock="true"
+                >
+                    <i class="fas fa-paper-plane"></i>
+                    <span class="hidden sm:inline">Send</span>
+                </button>
+            </form>
+            
+            <!-- Mobile-specific info bar -->
+            <div class="flex items-center justify-between mt-2 text-xs text-muted-foreground md:hidden">
+                <div class="flex items-center space-x-2">
+                    <span>Connected as:</span>
+                    <span class="font-medium text-foreground" data-bind="currentUser">Anonymous_7891</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <div class="w-2 h-2 bg-accent rounded-full"></div>
+                    <span>Online</span>
+                </div>
+            </div>
+        </footer>
+        <!-- @END_COMPONENT: MessageInput -->
+
+    </div>
+    <!-- @END_COMPONENT: ChatApplication -->
+
+    <!-- Connection Status Modal -->
+    <!-- @COMPONENT: ConnectionModal [displays connection status and errors] -->
+    <div id="connectionModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 hidden" data-implementation="Show when connection is lost">
+        <div class="fixed left-[50%] top-[50%] z-50 w-full max-w-md translate-x-[-50%] translate-y-[-50%] p-4">
+            <div class="bg-card border border-border rounded-lg shadow-lg p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="w-4 h-4 bg-destructive rounded-full animate-pulse"></div>
+                    <h3 class="text-lg font-semibold text-foreground">Connection Lost</h3>
+                </div>
+                <p class="text-muted-foreground mb-4">
+                    We're trying to reconnect you to the chat room. Please wait...
+                </p>
+                <div class="flex justify-end">
+                    <button class="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                        Retry Connection
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ConnectionModal -->
+
+    <script>
+        // TODO: Implement Socket.io client connection and real-time messaging
+        // TODO: Implement business logic for user management and message handling
+        
+        (function() {
+            // Mock data for demonstration
+            let currentUser = 'Anonymous_' + Math.floor(Math.random() * 10000);
+            let messages = [];
+            let onlineUsers = 12;
+            
+            // Simulate real-time message updates
+            function simulateMessageReceived() {
+                // This would be replaced with actual Socket.io event listeners
+                console.log('Ready for Socket.io integration');
+            }
+            
+            // Auto-scroll to bottom when new messages arrive
+            function scrollToBottom() {
+                const container = document.getElementById('messageContainer');
+                container.scrollTop = container.scrollHeight;
+            }
+            
+            // Simulate typing indicator
+            function handleTyping() {
+                // This would emit typing events via Socket.io
+                console.log('User is typing...');
+            }
+            
+            // Handle message sending
+            function handleMessageSend(event) {
+                event.preventDefault();
+                const input = event.target.querySelector('input');
+                const message = input.value.trim();
+                
+                if (message) {
+                    // TODO: Emit message via Socket.io
+                    console.log('Sending message:', message);
+                    input.value = '';
+                    scrollToBottom();
+                }
+            }
+            
+            // Initialize chat interface
+            function initializeChat() {
+                // Set current user
+                const userElements = document.querySelectorAll('[data-bind="currentUser"]');
+                userElements.forEach(el => el.textContent = currentUser);
+                
+                // Scroll to bottom on load
+                scrollToBottom();
+                
+                // Add form event listener
+                const form = document.querySelector('form');
+                form.addEventListener('submit', handleMessageSend);
+                
+                // Add typing event listener
+                const input = document.querySelector('input[type="text"]');
+                input.addEventListener('input', handleTyping);
+                
+                // TODO: Initialize Socket.io connection
+                // TODO: Set up event listeners for incoming messages
+                // TODO: Handle user join/leave events
+                // TODO: Implement error handling and reconnection logic
+            }
+            
+            // Initialize when DOM is loaded
+            document.addEventListener('DOMContentLoaded', initializeChat);
+        })();
+    </script>
+</body>
+</html>
