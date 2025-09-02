@@ -23,6 +23,7 @@ export default function Chat() {
   const wsRef = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
+  const usernameRef = useRef<string>("");
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -63,6 +64,7 @@ export default function Chat() {
         case 'init':
           setMessages(data.messages || []);
           setUsername(data.username);
+          usernameRef.current = data.username;
           setUserId(data.userId);
           break;
           
@@ -75,7 +77,7 @@ export default function Chat() {
           break;
           
         case 'typing':
-          if (data.username !== username) {
+          if (data.username !== usernameRef.current) {
             setTypingUsers(prev => {
               const filtered = prev.filter(user => user.username !== data.username);
               if (data.isTyping) {
@@ -105,7 +107,7 @@ export default function Chat() {
     return () => {
       ws.close();
     };
-  }, [username]);
+  }, []); // Remove username dependency to prevent reconnection loop
 
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
